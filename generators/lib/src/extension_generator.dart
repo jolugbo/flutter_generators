@@ -3,7 +3,7 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 
-import 'package:annotations/annotations.dart';
+import 'package:annotations/src/annotations.dart';
 
 import 'model_visitor.dart';
 
@@ -48,4 +48,26 @@ class ExtensionGenerator extends GeneratorForAnnotation<ExtensionAnnotation> {
     // 11
     return classBuffer.toString();
   }
+
+  void generateGettersAndSetters(
+      ModelVisitor visitor, StringBuffer classBuffer) {
+// 1
+    for (final field in visitor.fields.keys) {
+      // 2
+      final variable =
+      field.startsWith('_') ? field.replaceFirst('_', '') : field;
+
+      // 3 getter
+      classBuffer.writeln(
+          "${visitor.fields[field]} get $variable => variables['$variable'];");
+      // EX: String get name => variables['name'];
+
+      // 4 setter
+      classBuffer.writeln(
+          'set $variable(${visitor.fields[field]} $variable)');
+      classBuffer.writeln('=> $field = $variable;');
+      // EX: set name(String name) => _name = name;
+    }
+  }
+
 }
